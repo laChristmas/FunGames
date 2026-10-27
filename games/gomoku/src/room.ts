@@ -1,9 +1,13 @@
 import { Room, ServerError, type Client } from "@colyseus/core";
 import { saveOnlineMatch } from "@fungames/db/records";
+import { createLimiter } from "@fungames/shared/limit";
 import { verifyTicket, type TicketPayload } from "@fungames/shared/ticket";
 import { releaseRoomCode, takeRoomCode } from "./code";
-import { applyMove, createBoard, type Stone } from "./rules";
+import { acceptMove } from "./play";
+import { createBoard, type Stone } from "./rules";
 import { GomokuState } from "./state";
+
+const allowRoomCreate = createLimiter(5, 60_000);
 
 export class GomokuRoom extends Room<GomokuState, { code: string }, unknown, TicketPayload> {
   maxClients = 2;
@@ -20,7 +24,15 @@ export class GomokuRoom extends Room<GomokuState, { code: string }, unknown, Tic
     }
   }
 
-  async onCreate() {
+  async onCreate(options: { ticket?: string }) {
+    let userId = "";
+    try {
+      userId = verifyTicket(options?.ticket ?? "", process.env.TICKET_SECRET ?? "", "gomoku").sub;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "凭证无效";
+      throw new ServerError(401, message);
+    }
+    if (!allowRoomCreate(userId)) throw new ServerError(429, "创建房间太频繁");
     const code = takeRoomCode();
     this.setState(new GomokuState());
     this.state.code = code;
@@ -28,18 +40,14 @@ export class GomokuRoom extends Room<GomokuState, { code: string }, unknown, Tic
     this.state.turn = 1;
     (this.listing as { code?: string }).code = code;
     await this.setMetadata({ code });
-    this.onMessage("move", (client, message: { x?: unknown; y?: unknown }) => {
+    this.onMessage("move", (client, message: unknown) => {
       const seat = this.seats.get(client.sessionId);
-      if (!seat || seat.stone !== this.state.turn || this.state.winner) {
+      if (!seat || this.state.winner) {
         client.send("rejected", "还没轮到你");
         return;
       }
-      if (typeof message?.x !== "number" || typeof message?.y !== "number") {
-        client.send("rejected", "落子无效");
-        return;
-      }
       const board = this.state.board.split("").map((cell) => Number(cell));
-      const result = applyMove(board, { x: message.x, y: message.y }, seat.stone);
+      const result = acceptMove(board, this.state.turn === 2 ? 2 : 1, seat.stone, message);
       if (!result.ok) {
         client.send("rejected", result.reason);
         return;

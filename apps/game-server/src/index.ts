@@ -8,7 +8,7 @@ if (!process.env.TICKET_SECRET) {
   process.exit(1);
 }
 
-// 先写入游戏清单，房间终局才能引用它。
+// 启动前先写入游戏清单，终局记录才能引用它。
 await ensureGomoku();
 
 const gameServer = new Server({

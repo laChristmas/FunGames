@@ -4,12 +4,17 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./ticket": "./src/ticket.ts"
+    "./ticket": "./src/ticket.ts",
+    "./messages": "./src/messages.ts",
+    "./limit": "./src/limit.ts"
   },
   "scripts": {
-    "test": "node --import tsx --test src/ticket.test.ts"
+    "test": "node --import tsx --test src/ticket.test.ts src/messages.test.ts src/limit.test.ts"
   },
   "devDependencies": {
     "tsx": "^4.20.6"
+  },
+  "dependencies": {
+    "zod": "^4.6.7"
   }
 }
