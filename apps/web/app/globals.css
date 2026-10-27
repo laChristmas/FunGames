@@ -1,8 +1,74 @@
 @import "tailwindcss";
 
+:root {
+  --bg: #f6f5f2;
+  --text: #1c1c1c;
+  --muted: #5f5f5a;
+  --surface: #ffffff;
+  --line: #e3e1da;
+  --accent: #2457d6;
+  --on-accent: #ffffff;
+  color-scheme: light;
+}
+
+.dark {
+  --bg: #121212;
+  --text: #f2f2ef;
+  --muted: #a8a8a2;
+  --surface: #1c1c1c;
+  --line: #2c2c2c;
+  --accent: #8eaeef;
+  --on-accent: #101010;
+  color-scheme: dark;
+}
+
 body {
   margin: 0;
-  background: #fff;
-  color: #111;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--text);
   font-family: system-ui, sans-serif;
+}
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 56px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.site-brand {
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.theme-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.theme-switch button {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.theme-switch button[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+
+.page {
+  padding: 24px 16px 40px;
 }
