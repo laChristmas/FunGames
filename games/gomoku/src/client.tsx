@@ -14,12 +14,13 @@ function label(winner: Stone | "draw" | null, turn: Stone, mode: Mode) {
   return turn === 1 ? "轮到黑棋" : "轮到白棋";
 }
 
-export function GomokuMatch({ mode }: { mode: Mode }) {
+export function GomokuMatch({ mode, canSave = false }: { mode: Mode; canSave?: boolean }) {
   const [board, setBoard] = useState<Board>(createBoard);
   const [turn, setTurn] = useState<Stone>(1);
   const [winner, setWinner] = useState<Stone | "draw" | null>(null);
   const [history, setHistory] = useState<Array<{ board: Board; turn: Stone }>>([]);
   const [paint, setPaint] = useState(0);
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     const onTheme = () => setPaint((value) => value + 1);
@@ -32,6 +33,18 @@ export function GomokuMatch({ mode }: { mode: Mode }) {
     setTurn(1);
     setWinner(null);
     setHistory([]);
+    setSaved(false);
+  }
+
+  async function save() {
+    if (!winner || saved) return;
+    const result = winner === "draw" ? "draw" : winner === 1 ? "win" : "loss";
+    const response = await fetch("/api/matches", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ result }),
+    });
+    if (response.ok) setSaved(true);
   }
 
   function place(x: number, y: number) {
@@ -96,6 +109,11 @@ export function GomokuMatch({ mode }: { mode: Mode }) {
         <button type="button" onClick={reset}>
           再来一局
         </button>
+        {canSave && mode === "ai" && winner ? (
+          <button type="button" onClick={save} disabled={saved}>
+            {saved ? "已保存" : "保存到账号"}
+          </button>
+        ) : null}
       </div>
     </div>
   );

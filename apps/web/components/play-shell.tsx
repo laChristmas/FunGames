@@ -54,7 +54,7 @@ export function PlayShell({ game }: { game: GameMeta }) {
           {mode === "online" ? (
             <OnlineMatch />
           ) : (
-            <GomokuMatch mode={mode} />
+            <GomokuMatch mode={mode} canSave={mode === "ai" && Boolean(data)} />
           )}
           <button type="button" className="reselect" onClick={() => setMode(null)}>
             重新选择

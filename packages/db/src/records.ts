@@ -30,3 +30,23 @@ export async function saveOnlineMatch(input: {
   );
   return matchId;
 }
+
+export async function saveSoloMatch(input: { userId: string; result: "win" | "loss" | "draw" }) {
+  await ensureGomoku();
+  const matchId = crypto.randomUUID();
+  const now = new Date();
+  await db.insert(match).values({
+    id: matchId,
+    gameSlug: "gomoku",
+    mode: "solo",
+    startedAt: now,
+    endedAt: now,
+  });
+  await db.insert(matchPlayer).values({
+    id: crypto.randomUUID(),
+    matchId,
+    userId: input.userId,
+    result: input.result,
+  });
+  return matchId;
+}
