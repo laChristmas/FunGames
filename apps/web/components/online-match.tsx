@@ -1,6 +1,8 @@
 "use client";
 
 import { Client, type Room } from "colyseus.js";
+import { GomokuBoard } from "@fungames/gomoku/board";
+import { SIZE, type Cell } from "@fungames/gomoku/rules";
 import { GomokuState } from "@fungames/gomoku/state";
 import { useEffect, useRef, useState } from "react";
 
@@ -32,6 +34,8 @@ export function OnlineMatch() {
   const [joinCode, setJoinCode] = useState("");
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
+  const [lastIndex, setLastIndex] = useState<number | null>(null);
+  const previousBoard = useRef("");
 
   useEffect(() => () => roomRef.current?.leave(), []);
 
@@ -39,6 +43,19 @@ export function OnlineMatch() {
     roomRef.current = joined;
     joined.onMessage("seat", (value: Seat) => setSeat(value));
     const apply = (state: View) => {
+      const board = state.board ?? "";
+      const previous = previousBoard.current;
+      if (previous && previous !== board) {
+        let found: number | null = null;
+        const limit = Math.max(previous.length, board.length);
+        for (let index = 0; index < limit; index += 1) {
+          const before = previous[index] ?? "0";
+          const after = board[index] ?? "0";
+          if (before !== after && after !== "0") found = index;
+        }
+        if (found !== null) setLastIndex(found);
+      }
+      previousBoard.current = board;
       setView({
         code: state.code ?? "",
         board: state.board ?? "",
@@ -100,7 +117,11 @@ export function OnlineMatch() {
     );
   }
 
-  const cells = view.board.padEnd(225, "0").slice(0, 225).split("");
+  const cells: Cell[] = view.board
+    .padEnd(SIZE * SIZE, "0")
+    .slice(0, SIZE * SIZE)
+    .split("")
+    .map((cell) => (cell === "1" ? 1 : cell === "2" ? 2 : 0));
   return (
     <div className="match">
       <p>{describe(view, seat)}</p>
@@ -124,25 +145,12 @@ export function OnlineMatch() {
       >
         {copied ? "已复制" : "复制房间码"}
       </button>
-      <div className="gomoku" role="grid" aria-label="五子棋棋盘">
-        {cells.map((cell, index) => {
-          const x = index % 15;
-          const y = Math.floor(index / 15);
-          return (
-            <button
-              key={index}
-              type="button"
-              role="gridcell"
-              aria-label={`第 ${y + 1} 行第 ${x + 1} 列`}
-              disabled={Boolean(view.winner) || cell !== "0" || seat !== view.turn}
-              onClick={() => roomRef.current?.send("move", { x, y })}
-            >
-              {cell === "1" ? <span className="stone black" /> : null}
-              {cell === "2" ? <span className="stone white" /> : null}
-            </button>
-          );
-        })}
-      </div>
+      <GomokuBoard
+        cells={cells}
+        lastIndex={lastIndex}
+        playable={() => !view.winner && seat === view.turn}
+        onPlace={(x, y) => roomRef.current?.send("move", { x, y })}
+      />
     </div>
   );
 }

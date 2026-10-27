@@ -4,6 +4,14 @@ import test from "node:test";
 import { chooseMove } from "./ai.ts";
 import { applyMove, createBoard, replay, sampleKifu } from "./rules.ts";
 
+test("棋盘是 19 路", () => {
+  assert.equal(createBoard().length, 361);
+  const edge = applyMove(createBoard(), { x: 18, y: 18 }, 1);
+  assert.equal(edge.ok, true);
+  const outside = applyMove(createBoard(), { x: 19, y: 0 }, 1);
+  assert.equal(outside.ok, false);
+});
+
 test("固定棋谱以黑棋五连结束", () => {
   const result = replay(sampleKifu);
   assert.equal(result.winner, 1);

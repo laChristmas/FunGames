@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { chooseMove } from "./ai";
-import { applyMove, createBoard, type Board, type Stone } from "./rules";
+import { GomokuBoard } from "./board";
+import { applyMove, cellIndex, createBoard, type Board, type Stone } from "./rules";
 
 type Mode = "ai" | "local";
 
@@ -18,7 +19,8 @@ export function GomokuMatch({ mode, canSave = false }: { mode: Mode; canSave?: b
   const [board, setBoard] = useState<Board>(createBoard);
   const [turn, setTurn] = useState<Stone>(1);
   const [winner, setWinner] = useState<Stone | "draw" | null>(null);
-  const [history, setHistory] = useState<Array<{ board: Board; turn: Stone }>>([]);
+  const [history, setHistory] = useState<Array<{ board: Board; turn: Stone; last: number | null }>>([]);
+  const [last, setLast] = useState<number | null>(null);
   const [paint, setPaint] = useState(0);
   const [saved, setSaved] = useState(false);
 
@@ -33,6 +35,7 @@ export function GomokuMatch({ mode, canSave = false }: { mode: Mode; canSave?: b
     setTurn(1);
     setWinner(null);
     setHistory([]);
+    setLast(null);
     setSaved(false);
   }
 
@@ -51,24 +54,28 @@ export function GomokuMatch({ mode, canSave = false }: { mode: Mode; canSave?: b
     if (winner) return;
     const result = applyMove(board, { x, y }, turn);
     if (!result.ok) return;
-    const snapshot = { board, turn };
+    const snapshot = { board, turn, last };
     setHistory((items) => [...items, snapshot]);
+    const placed = cellIndex(x, y);
     if (mode === "local" || result.winner) {
       setBoard(result.board);
       setWinner(result.winner);
       setTurn(turn === 1 ? 2 : 1);
+      setLast(placed);
       return;
     }
     const aiMove = chooseMove(result.board, 2);
     if (!aiMove) {
       setBoard(result.board);
       setWinner(result.winner);
+      setLast(placed);
       return;
     }
     const aiResult = applyMove(result.board, aiMove, 2);
     if (!aiResult.ok) return;
     setBoard(aiResult.board);
     setWinner(aiResult.winner);
+    setLast(cellIndex(aiMove.x, aiMove.y));
   }
 
   function undo() {
@@ -76,6 +83,7 @@ export function GomokuMatch({ mode, canSave = false }: { mode: Mode; canSave?: b
     if (!previous) return;
     setBoard(previous.board);
     setTurn(previous.turn);
+    setLast(previous.last);
     setWinner(null);
     setHistory((items) => items.slice(0, -1));
   }
@@ -83,25 +91,12 @@ export function GomokuMatch({ mode, canSave = false }: { mode: Mode; canSave?: b
   return (
     <div className="match" data-paint={paint}>
       <p>{label(winner, turn, mode)}</p>
-      <div className="gomoku" role="grid" aria-label="五子棋棋盘">
-        {board.map((cell, index) => {
-          const x = index % 15;
-          const y = Math.floor(index / 15);
-          return (
-            <button
-              key={index}
-              type="button"
-              role="gridcell"
-              aria-label={`第 ${y + 1} 行第 ${x + 1} 列`}
-              disabled={Boolean(winner) || cell !== 0}
-              onClick={() => place(x, y)}
-            >
-              {cell === 1 ? <span className="stone black" /> : null}
-              {cell === 2 ? <span className="stone white" /> : null}
-            </button>
-          );
-        })}
-      </div>
+      <GomokuBoard
+        cells={board}
+        lastIndex={last}
+        playable={() => !winner}
+        onPlace={place}
+      />
       <div className="match-actions">
         <button type="button" onClick={undo} disabled={history.length === 0}>
           悔棋

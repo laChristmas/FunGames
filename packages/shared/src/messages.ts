@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 export const moveMessage = z.object({
-  x: z.number().int().min(0).max(14),
-  y: z.number().int().min(0).max(14),
+  x: z.number().int().min(0).max(18),
+  y: z.number().int().min(0).max(18),
 });
 
 export function parseMove(input: unknown) {

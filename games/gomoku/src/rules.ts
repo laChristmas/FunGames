@@ -1,4 +1,4 @@
-export const SIZE = 15;
+export const SIZE = 19;
 export type Stone = 1 | 2;
 export type Cell = 0 | Stone;
 export type Board = Cell[];

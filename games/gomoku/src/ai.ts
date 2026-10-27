@@ -1,10 +1,10 @@
-import { applyMove, type Board, type Move, type Stone } from "./rules";
+import { applyMove, cellIndex, inBounds, SIZE, type Board, type Move, type Stone } from "./rules";
 
 function emptyCells(board: Board): Move[] {
   const moves: Move[] = [];
-  for (let y = 0; y < 15; y += 1) {
-    for (let x = 0; x < 15; x += 1) {
-      if (board[y * 15 + x] === 0) moves.push({ x, y });
+  for (let y = 0; y < SIZE; y += 1) {
+    for (let x = 0; x < SIZE; x += 1) {
+      if (board[cellIndex(x, y)] === 0) moves.push({ x, y });
     }
   }
   return moves;
@@ -17,11 +17,12 @@ function neighborScore(board: Board, move: Move) {
       if (dx === 0 && dy === 0) continue;
       const x = move.x + dx;
       const y = move.y + dy;
-      if (x < 0 || y < 0 || x >= 15 || y >= 15) continue;
-      if (board[y * 15 + x] !== 0) score += 2;
+      if (!inBounds(x, y)) continue;
+      if (board[cellIndex(x, y)] !== 0) score += 2;
     }
   }
-  const center = Math.abs(move.x - 7) + Math.abs(move.y - 7);
+  const middle = (SIZE - 1) / 2;
+  const center = Math.abs(move.x - middle) + Math.abs(move.y - middle);
   return score * 10 - center;
 }
 

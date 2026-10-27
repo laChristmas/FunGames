@@ -319,33 +319,61 @@ body {
   margin: 0;
 }
 
-.gomoku {
-  display: grid;
-  grid-template-columns: repeat(15, minmax(0, 1fr));
+.goban {
+  position: relative;
   width: min(100%, calc(100dvh - 320px));
   aspect-ratio: 1;
   background: var(--board);
   touch-action: manipulation;
 }
 
-.gomoku button {
-  min-width: 0;
-  min-height: 0;
+.goban-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.goban-lines line {
+  stroke: var(--grid);
+  stroke-width: 0.06;
+}
+
+.goban-lines circle {
+  fill: var(--grid);
+}
+
+.goban-point {
+  position: absolute;
+  width: calc(100% / 20);
+  height: calc(100% / 20);
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
   padding: 0;
-  border: 1px solid var(--grid);
+  border: 0;
   background: transparent;
   cursor: pointer;
 }
 
-.gomoku button:disabled {
+.goban-point:disabled {
   cursor: default;
+}
+
+.goban-point:not(:disabled):hover::before,
+.goban-point:not(:disabled):focus-visible::before {
+  content: "";
+  width: 42%;
+  height: 42%;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--grid) 40%, transparent);
 }
 
 .stone {
   display: block;
-  width: 72%;
-  height: 72%;
-  margin: auto;
+  width: 86%;
+  height: 86%;
   border-radius: 50%;
 }
 
@@ -356,6 +384,14 @@ body {
 .stone.white {
   background: #f7f4ee;
   box-shadow: inset 0 0 0 1px #111111;
+}
+
+.stone.black.last {
+  box-shadow: 0 0 0 2px #c4554a;
+}
+
+.stone.white.last {
+  box-shadow: inset 0 0 0 1px #111111, 0 0 0 2px #c4554a;
 }
 
 .match-actions {
@@ -403,7 +439,7 @@ body {
     flex-direction: column;
   }
 
-  .gomoku {
+  .goban {
     width: min(64dvh, calc(100dvh - 140px));
   }
 }
