@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { chooseMove } from "./ai";
 import { GomokuBoard } from "./board";
+import { MatchPlayers } from "./players";
 import { applyMove, cellIndex, createBoard, type Board, type Stone } from "./rules";
 
 type Mode = "ai" | "local";
@@ -91,12 +92,19 @@ export function GomokuMatch({ mode, canSave = false }: { mode: Mode; canSave?: b
   return (
     <div className="match" data-paint={paint}>
       <p>{label(winner, turn, mode)}</p>
-      <GomokuBoard
-        cells={board}
-        lastIndex={last}
-        playable={() => !winner}
-        onPlace={place}
-      />
+      <div className="match-board">
+        <MatchPlayers
+          black={mode === "ai" ? "你" : "黑方"}
+          white={mode === "ai" ? "电脑" : "白方"}
+          active={winner ? null : turn}
+        />
+        <GomokuBoard
+          cells={board}
+          lastIndex={last}
+          playable={() => !winner}
+          onPlace={place}
+        />
+      </div>
       <div className="match-actions">
         <button type="button" onClick={undo} disabled={history.length === 0}>
           悔棋

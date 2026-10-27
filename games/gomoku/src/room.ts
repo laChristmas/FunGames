@@ -76,6 +76,8 @@ export class GomokuRoom extends Room<GomokuState, { code: string }, unknown, Tic
     if (this.seats.size >= 2) throw new ServerError(409, "房间已满");
     const stone: Stone = this.seats.size === 0 ? 1 : 2;
     this.seats.set(client.sessionId, { stone, userId: auth.sub });
+    if (stone === 1) this.state.blackName = auth.name;
+    else this.state.whiteName = auth.name;
     this.state.players = this.seats.size;
     client.send("seat", stone);
   }
@@ -84,6 +86,8 @@ export class GomokuRoom extends Room<GomokuState, { code: string }, unknown, Tic
     const seat = this.seats.get(client.sessionId);
     if (consented) {
       this.seats.delete(client.sessionId);
+      if (seat?.stone === 1) this.state.blackName = "";
+      if (seat?.stone === 2) this.state.whiteName = "";
       this.state.players = this.seats.size;
       return;
     }
@@ -93,6 +97,8 @@ export class GomokuRoom extends Room<GomokuState, { code: string }, unknown, Tic
       this.state.away = 0;
     } catch {
       this.seats.delete(client.sessionId);
+      if (seat?.stone === 1) this.state.blackName = "";
+      if (seat?.stone === 2) this.state.whiteName = "";
       this.state.away = 0;
       this.state.players = this.seats.size;
     }

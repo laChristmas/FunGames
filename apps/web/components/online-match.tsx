@@ -2,6 +2,7 @@
 
 import { Client, type Room } from "colyseus.js";
 import { GomokuBoard } from "@fungames/gomoku/board";
+import { MatchPlayers } from "@fungames/gomoku/players";
 import { SIZE, type Cell } from "@fungames/gomoku/rules";
 import { GomokuState } from "@fungames/gomoku/state";
 import { useEffect, useRef, useState } from "react";
@@ -15,6 +16,8 @@ type View = {
   winner: string;
   players: number;
   away: number;
+  blackName: string;
+  whiteName: string;
 };
 
 function describe(view: View, seat: Seat | null) {
@@ -63,6 +66,8 @@ export function OnlineMatch() {
         winner: state.winner ?? "",
         players: state.players ?? 0,
         away: state.away ?? 0,
+        blackName: state.blackName ?? "",
+        whiteName: state.whiteName ?? "",
       });
     };
     if (joined.state) apply(joined.state as View);
@@ -145,12 +150,19 @@ export function OnlineMatch() {
       >
         {copied ? "已复制" : "复制房间码"}
       </button>
-      <GomokuBoard
-        cells={cells}
-        lastIndex={lastIndex}
-        playable={() => !view.winner && seat === view.turn}
-        onPlace={(x, y) => roomRef.current?.send("move", { x, y })}
-      />
+      <div className="match-board">
+        <MatchPlayers
+          black={view.blackName || "等待加入"}
+          white={view.whiteName || "等待加入"}
+          active={view.winner || view.players < 2 ? null : view.turn === 2 ? 2 : 1}
+        />
+        <GomokuBoard
+          cells={cells}
+          lastIndex={lastIndex}
+          playable={() => !view.winner && seat === view.turn}
+          onPlace={(x, y) => roomRef.current?.send("move", { x, y })}
+        />
+      </div>
     </div>
   );
 }

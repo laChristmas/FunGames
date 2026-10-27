@@ -7,4 +7,6 @@ export const GomokuState = schema({
   winner: "string",
   players: "uint8",
   away: "uint8",
+  blackName: "string",
+  whiteName: "string",
 });
