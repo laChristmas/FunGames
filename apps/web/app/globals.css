@@ -72,3 +72,70 @@ body {
 .page {
   padding: 24px 16px 40px;
 }
+
+.page h1 {
+  margin: 0 0 16px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.catalog {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .catalog {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 1024px) {
+  .catalog {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.game-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 44px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.game-cover {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.game-title {
+  font-weight: 600;
+}
+
+.game-players,
+.mode-tag {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.mode-list {
+  display: flex;
+  gap: 8px;
+}
+
+.mode-tag {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
