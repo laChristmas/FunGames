@@ -1,6 +1,9 @@
 "use client";
 
 import { cellIndex, SIZE, type Cell } from "./rules";
+import { unlockStoneSound } from "./sound";
+
+export { playStoneSound, unlockStoneSound } from "./sound";
 
 const stars = [3, 9, 15];
 
@@ -45,7 +48,10 @@ export function GomokuBoard({
             }}
             aria-label={`第 ${y + 1} 路第 ${x + 1} 路`}
             disabled={!playable(x, y) || cell !== 0}
-            onClick={() => onPlace(x, y)}
+            onClick={() => {
+              unlockStoneSound();
+              onPlace(x, y);
+            }}
           >
             {cell === 1 ? <span className={last ? "stone black last" : "stone black"} /> : null}
             {cell === 2 ? <span className={last ? "stone white last" : "stone white"} /> : null}

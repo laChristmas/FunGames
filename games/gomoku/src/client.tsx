@@ -8,6 +8,7 @@ import { armTurn, createClock, formatClock, tickClock, timedOut, undoClock, type
 import { ClockSetup } from "./clock-setup";
 import { MatchPlayers } from "./players";
 import { applyMove, cellIndex, createBoard, type Board, type Stone } from "./rules";
+import { playStoneSound } from "./sound";
 
 type Mode = "ai" | "local";
 type Reason = "" | "five" | "timeout" | "draw";
@@ -117,6 +118,7 @@ export function GomokuMatch({ mode, canSave = false }: { mode: Mode; canSave?: b
     }
     const result = applyMove(board, { x, y }, turnRef.current);
     if (!result.ok) return;
+    if (!result.winner) playStoneSound();
     const snapshot = { board, turn: turnRef.current, last, clock: spent };
     setHistory((items) => [...items, snapshot]);
     const placed = cellIndex(x, y);
@@ -141,6 +143,7 @@ export function GomokuMatch({ mode, canSave = false }: { mode: Mode; canSave?: b
     }
     const aiResult = applyMove(result.board, aiMove, 2);
     if (!aiResult.ok) return;
+    if (!aiResult.winner) playStoneSound();
     setBoard(aiResult.board);
     setWinner(aiResult.winner);
     setReason(aiResult.winner === "draw" ? "draw" : aiResult.winner ? "five" : "");

@@ -2,6 +2,7 @@
 
 import { moveMaxMs, moveMinMs, movePresets, parseClock, sideMaxMs, sideMinMs, sidePresets, type ClockChoice } from "@fungames/shared/clock";
 import { useState } from "react";
+import { unlockStoneSound } from "./sound";
 
 const moveLabels: Record<number, string> = {
   15_000: "15 秒",
@@ -23,6 +24,7 @@ export function ClockSetup({ onStart }: { onStart: (choice: ClockChoice) => void
   const [error, setError] = useState("");
 
   function startCustom() {
+    unlockStoneSound();
     const amount = Number(custom);
     const ms = kind === "move" ? amount * 1000 : amount * 60_000;
     const choice = parseClock({ kind, ms });
@@ -38,7 +40,7 @@ export function ClockSetup({ onStart }: { onStart: (choice: ClockChoice) => void
 
   return (
     <div className="clock-setup">
-      <button type="button" onClick={() => onStart({ kind: "none", ms: 0 })}>
+      <button type="button" onClick={() => { unlockStoneSound(); onStart({ kind: "none", ms: 0 }); }}>
         不限时
       </button>
       <div className="clock-kind" role="group" aria-label="计时方式">
@@ -51,7 +53,7 @@ export function ClockSetup({ onStart }: { onStart: (choice: ClockChoice) => void
       </div>
       <div className="clock-presets">
         {presets.map((ms) => (
-          <button key={ms} type="button" onClick={() => onStart({ kind, ms })}>
+          <button key={ms} type="button" onClick={() => { unlockStoneSound(); onStart({ kind, ms }); }}>
             {labels[ms]}
           </button>
         ))}

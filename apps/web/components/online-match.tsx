@@ -1,7 +1,7 @@
 "use client";
 
 import { Client, type Room } from "colyseus.js";
-import { GomokuBoard } from "@fungames/gomoku/board";
+import { GomokuBoard, playStoneSound, unlockStoneSound } from "@fungames/gomoku/board";
 import { formatClock } from "@fungames/gomoku/clock";
 import { ClockSetup } from "@fungames/gomoku/clock-setup";
 import { MatchPlayers } from "@fungames/gomoku/players";
@@ -66,7 +66,11 @@ export function OnlineMatch() {
           const after = board[index] ?? "0";
           if (before !== after && after !== "0") found = index;
         }
-        if (found !== null) setLastIndex(found);
+        if (found !== null) {
+          setLastIndex(found);
+          const ended = Boolean(state.winner) || state.endReason === "five" || state.endReason === "draw" || state.endReason === "timeout";
+          if (!ended) playStoneSound();
+        }
       }
       previousBoard.current = board;
       setView({
@@ -101,6 +105,7 @@ export function OnlineMatch() {
   }
 
   async function connect(action: "create" | "join", clock?: ClockChoice) {
+    unlockStoneSound();
     setError("");
     setCopied(false);
     try {
