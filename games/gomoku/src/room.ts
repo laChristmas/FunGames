@@ -4,6 +4,7 @@ import { createLimiter } from "@fungames/shared/limit";
 import { verifyTicket, type TicketPayload } from "@fungames/shared/ticket";
 import { releaseRoomCode, takeRoomCode } from "./code";
 import { acceptMove } from "./play";
+import { duplicateSeat, roomExpired } from "./room-policy";
 import { createBoard, type Stone } from "./rules";
 import { GomokuState } from "./state";
 
@@ -61,10 +62,18 @@ export class GomokuRoom extends Room<GomokuState, { code: string }, unknown, Tic
       const seat = this.seats.get(client.sessionId);
       if (seat) client.send("seat", seat.stone);
     });
+    this.clock.setInterval(() => {
+      if (roomExpired(this.seats.size, Date.now() - this.startedAt.getTime())) {
+        void this.disconnect();
+      }
+    }, 1000);
   }
 
   onJoin(client: Client, _options: unknown, auth?: TicketPayload) {
-    if (this.seats.has(client.sessionId) || this.seats.size >= 2 || !auth?.sub) return;
+    if (!auth?.sub) throw new ServerError(401, "凭证无效");
+    const seated = [...this.seats.values()].map((seat) => seat.userId);
+    if (duplicateSeat(seated, auth.sub)) throw new ServerError(409, "已经在房间里");
+    if (this.seats.size >= 2) throw new ServerError(409, "房间已满");
     const stone: Stone = this.seats.size === 0 ? 1 : 2;
     this.seats.set(client.sessionId, { stone, userId: auth.sub });
     this.state.players = this.seats.size;
