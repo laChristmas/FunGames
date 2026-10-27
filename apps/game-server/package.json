@@ -2,5 +2,16 @@
   "name": "@fungames/game-server",
   "version": "0.0.0",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "dev": "node --env-file=../../apps/web/.env.local --import tsx src/index.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.15"
+  },
+  "dependencies": {
+    "@colyseus/core": "0.16.20",
+    "@colyseus/schema": "3.0.76",
+    "@colyseus/ws-transport": "0.16.5"
+  }
 }

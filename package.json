@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "pnpm --filter @fungames/web dev",
+    "dev:game": "pnpm --filter @fungames/game-server dev",
     "db:up": "docker compose up -d",
     "db:ready": "docker compose exec -T postgres pg_isready -U fungames -d fungames"
   }
