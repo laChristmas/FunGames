@@ -19,9 +19,9 @@ importers:
       '@colyseus/ws-transport':
         specifier: 0.16.5
         version: 0.16.5(@colyseus/core@0.16.20(@colyseus/schema@3.0.76))
-      '@fungames/shared':
+      '@fungames/gomoku':
         specifier: workspace:*
-        version: link:../../packages/shared
+        version: link:../../games/gomoku
     devDependencies:
       tsx:
         specifier: ^4.23.15
@@ -29,6 +29,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@colyseus/schema':
+        specifier: 3.0.76
+        version: 3.0.76
       '@fungames/db':
         specifier: workspace:*
         version: link:../../packages/db
@@ -84,6 +87,15 @@ importers:
 
   games/gomoku:
     dependencies:
+      '@colyseus/core':
+        specifier: 0.16.20
+        version: 0.16.20(@colyseus/schema@3.0.76)
+      '@colyseus/schema':
+        specifier: 3.0.76
+        version: 3.0.76
+      '@fungames/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       react:
         specifier: ^19.0.0
         version: 19.3.1

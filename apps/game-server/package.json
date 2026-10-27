@@ -13,6 +13,6 @@
     "@colyseus/core": "0.16.20",
     "@colyseus/schema": "3.0.76",
     "@colyseus/ws-transport": "0.16.5",
-    "@fungames/shared": "workspace:*"
+    "@fungames/gomoku": "workspace:*"
   }
 }

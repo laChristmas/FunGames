@@ -6,13 +6,20 @@
   "exports": {
     "./rules": "./src/rules.ts",
     "./ai": "./src/ai.ts",
-    "./client": "./src/client.tsx"
+    "./client": "./src/client.tsx",
+    "./room": "./src/room.ts",
+    "./state": "./src/state.ts"
   },
   "scripts": {
-    "test": "node --import tsx --test src/rules.test.ts"
+    "test": "node --import tsx --test src/rules.test.ts src/code.test.ts"
   },
   "devDependencies": {
     "tsx": "^4.20.6"
+  },
+  "dependencies": {
+    "@colyseus/core": "0.16.20",
+    "@colyseus/schema": "3.0.76",
+    "@fungames/shared": "workspace:*"
   },
   "peerDependencies": {
     "react": "^19.0.0"

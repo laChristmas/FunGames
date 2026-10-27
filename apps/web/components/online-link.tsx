@@ -1,6 +1,7 @@
 "use client";
 
 import { Client } from "colyseus.js";
+import { GomokuState } from "@fungames/gomoku/state";
 import { useEffect, useState } from "react";
 
 export function OnlineLink() {
@@ -18,7 +19,7 @@ export function OnlineLink() {
       .then(async (response) => {
         if (!response.ok) throw new Error("凭证申请失败");
         const body = (await response.json()) as { ticket: string };
-        return client.joinOrCreate("ping", { ticket: body.ticket });
+        return client.create("gomoku", { ticket: body.ticket }, GomokuState);
       })
       .then((joined) => {
         if (stopped) {
@@ -26,7 +27,11 @@ export function OnlineLink() {
           return;
         }
         room = joined;
-        setStatus("已连上联机服务");
+        const code = joined.state?.code;
+        setStatus(code ? `房间码 ${code}` : "已创建房间");
+        joined.onStateChange((next) => {
+          if (next.code) setStatus(`房间码 ${next.code}`);
+        });
       })
       .catch(() => {
         if (!stopped) setStatus("联机服务连不上");
