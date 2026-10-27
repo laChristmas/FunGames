@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node --env-file=../../apps/web/.env.local --import tsx src/index.ts"
+    "dev": "node --watch --env-file=../../apps/web/.env.local --import tsx src/index.ts"
   },
   "devDependencies": {
     "tsx": "^4.23.15"
