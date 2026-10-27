@@ -2,5 +2,18 @@
   "name": "@fungames/gomoku",
   "version": "0.0.0",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "exports": {
+    "./rules": "./src/rules.ts",
+    "./ai": "./src/ai.ts"
+  },
+  "scripts": {
+    "test": "node --import tsx --test src/rules.test.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.6"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  }
 }
