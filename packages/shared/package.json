@@ -6,10 +6,11 @@
   "exports": {
     "./ticket": "./src/ticket.ts",
     "./messages": "./src/messages.ts",
-    "./limit": "./src/limit.ts"
+    "./limit": "./src/limit.ts",
+    "./clock": "./src/clock.ts"
   },
   "scripts": {
-    "test": "node --import tsx --test src/ticket.test.ts src/messages.test.ts src/limit.test.ts"
+    "test": "node --import tsx --test src/ticket.test.ts src/messages.test.ts src/limit.test.ts src/clock.test.ts"
   },
   "devDependencies": {
     "tsx": "^4.20.6"

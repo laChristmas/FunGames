@@ -13,7 +13,7 @@
     "./state": "./src/state.ts"
   },
   "scripts": {
-    "test": "node --import tsx --test src/rules.test.ts src/code.test.ts src/play.test.ts src/room-policy.test.ts"
+    "test": "node --import tsx --test src/rules.test.ts src/code.test.ts src/play.test.ts src/room-policy.test.ts src/clock.test.ts"
   },
   "devDependencies": {
     "tsx": "^4.20.6"
