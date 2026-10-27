@@ -23,6 +23,33 @@ export function applyTheme(pref: ThemePreference) {
   root.style.colorScheme = dark ? "dark" : "light";
   root.dataset.theme = pref;
   localStorage.setItem(THEME_STORAGE_KEY, pref);
+  window.dispatchEvent(new Event("fungames-theme"));
+}
+
+export async function persistTheme(pref: ThemePreference) {
+  applyTheme(pref);
+  await fetch("/api/profile", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ theme: pref }),
+  });
+}
+
+export function ThemeSync() {
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/profile")
+      .then(async (response) => {
+        if (!response.ok || cancelled) return;
+        const data = (await response.json()) as { theme?: string };
+        if (isPreference(data.theme ?? null)) applyTheme(data.theme);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  return null;
 }
 
 export function ThemeSwitcher() {
@@ -37,8 +64,16 @@ export function ThemeSwitcher() {
       const current = localStorage.getItem(THEME_STORAGE_KEY);
       if (!isPreference(current) || current === "system") applyTheme("system");
     };
+    const onStored = () => {
+      const current = localStorage.getItem(THEME_STORAGE_KEY);
+      if (isPreference(current)) setPref(current);
+    };
     media.addEventListener("change", onChange);
-    return () => media.removeEventListener("change", onChange);
+    window.addEventListener("fungames-theme", onStored);
+    return () => {
+      media.removeEventListener("change", onChange);
+      window.removeEventListener("fungames-theme", onStored);
+    };
   }, []);
 
   return (
@@ -49,7 +84,7 @@ export function ThemeSwitcher() {
           type="button"
           aria-pressed={pref === option.id}
           onClick={() => {
-            applyTheme(option.id);
+            void persistTheme(option.id);
             setPref(option.id);
           }}
         >
