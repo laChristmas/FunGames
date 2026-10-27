@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const params = useSearchParams();
+  const next = params.get("next") || "/";
   const [error, setError] = useState("");
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -33,7 +35,7 @@ export default function RegisterPage() {
       setError(result.error.message ?? "注册失败");
       return;
     }
-    router.push("/");
+    router.push(next);
     router.refresh();
   }
 

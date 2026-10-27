@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata, Viewport } from "next";
 import { SiteHeader } from "@/components/site-header";
 import { themeInitScript } from "@/lib/theme";
@@ -22,7 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <SiteHeader />
-        {children}
+        <Suspense fallback={null}>{children}</Suspense>
       </body>
     </html>
   );
