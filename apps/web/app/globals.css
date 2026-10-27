@@ -340,9 +340,63 @@ body {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
+}
+
+.player-name {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+.player-time {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.clock-setup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(100%, 360px);
+}
+
+.clock-kind,
+.clock-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.clock-setup button,
+.clock-setup input {
+  min-height: 44px;
+}
+
+.clock-setup input {
+  width: 100%;
+  margin-top: 6px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.clock-setup > button,
+.clock-kind button,
+.clock-presets button {
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.clock-kind button[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
 }
 
 .player.black {

@@ -2,7 +2,9 @@ import { Room, ServerError, type Client } from "@colyseus/core";
 import { saveOnlineMatch } from "@fungames/db/records";
 import { createLimiter } from "@fungames/shared/limit";
 import { verifyTicket, type TicketPayload } from "@fungames/shared/ticket";
+import { parseClock } from "@fungames/shared/clock";
 import { releaseRoomCode, takeRoomCode } from "./code";
+import { armTurn, clockRunning, tickClock, timedOut, type Clock } from "./clock";
 import { acceptMove } from "./play";
 import { duplicateSeat, roomExpired } from "./room-policy";
 import { createBoard, type Stone } from "./rules";
@@ -15,6 +17,7 @@ export class GomokuRoom extends Room<GomokuState, { code: string }, unknown, Tic
   seats = new Map<string, { stone: Stone; userId: string }>();
   startedAt = new Date();
   saved = false;
+  playTimer: ReturnType<typeof setInterval> | null = null;
 
   async onAuth(_client: Client, options: { ticket?: string }) {
     try {
@@ -25,7 +28,7 @@ export class GomokuRoom extends Room<GomokuState, { code: string }, unknown, Tic
     }
   }
 
-  async onCreate(options: { ticket?: string }) {
+  async onCreate(options: { ticket?: string; clock?: unknown }) {
     let userId = "";
     try {
       userId = verifyTicket(options?.ticket ?? "", process.env.TICKET_SECRET ?? "", "gomoku").sub;
@@ -33,12 +36,21 @@ export class GomokuRoom extends Room<GomokuState, { code: string }, unknown, Tic
       const message = error instanceof Error ? error.message : "凭证无效";
       throw new ServerError(401, message);
     }
+    const choice = parseClock(options.clock ?? { kind: "none" });
+    if (!choice) throw new ServerError(400, "计时无效");
     if (!allowRoomCreate(userId)) throw new ServerError(429, "创建房间太频繁");
     const code = takeRoomCode();
     this.setState(new GomokuState());
     this.state.code = code;
     this.state.board = createBoard().join("");
     this.state.turn = 1;
+    this.state.winner = "";
+    this.state.away = 0;
+    this.state.endReason = "";
+    this.state.clockKind = choice.kind;
+    this.state.clockBudget = choice.ms;
+    this.state.blackMs = choice.ms;
+    this.state.whiteMs = choice.ms;
     (this.listing as { code?: string }).code = code;
     await this.setMetadata({ code });
     this.onMessage("move", (client, message: unknown) => {
@@ -48,25 +60,96 @@ export class GomokuRoom extends Room<GomokuState, { code: string }, unknown, Tic
         return;
       }
       const board = this.state.board.split("").map((cell) => Number(cell));
-      const result = acceptMove(board, this.state.turn === 2 ? 2 : 1, seat.stone, message);
+      const turn: Stone = this.state.turn === 2 ? 2 : 1;
+      if (this.alreadyTimedOut(turn)) {
+        client.send("rejected", "已超时");
+        this.finishByTime(turn);
+        return;
+      }
+      const result = acceptMove(board, turn, seat.stone, message);
       if (!result.ok) {
         client.send("rejected", result.reason);
         return;
       }
       this.state.board = result.board.join("");
       this.state.winner = result.winner ? String(result.winner) : "";
-      if (!result.winner) this.state.turn = seat.stone === 1 ? 2 : 1;
-      if (result.winner) void this.record();
+      if (!result.winner) {
+        const nextTurn: Stone = seat.stone === 1 ? 2 : 1;
+        this.state.turn = nextTurn;
+        this.writeClock(armTurn(this.readClock(), nextTurn));
+      } else {
+        this.state.endReason = result.winner === "draw" ? "draw" : "five";
+        void this.record();
+      }
     });
     this.onMessage("hello", (client) => {
       const seat = this.seats.get(client.sessionId);
       if (seat) client.send("seat", seat.stone);
     });
-    this.clock.setInterval(() => {
+    this.playTimer = setInterval(() => {
       if (roomExpired(this.seats.size, Date.now() - this.startedAt.getTime())) {
+        this.stopPlayTimer();
         void this.disconnect();
+        return;
       }
+      this.advanceClock(1000);
     }, 1000);
+  }
+
+  stopPlayTimer() {
+    if (!this.playTimer) return;
+    clearInterval(this.playTimer);
+    this.playTimer = null;
+  }
+
+  readClock(): Clock {
+    const kind = this.state.clockKind === "move" || this.state.clockKind === "side" ? this.state.clockKind : "none";
+    return {
+      kind,
+      budget: this.state.clockBudget,
+      blackMs: this.state.blackMs,
+      whiteMs: this.state.whiteMs,
+    };
+  }
+
+  writeClock(clock: Clock) {
+    this.state.blackMs = clock.blackMs;
+    this.state.whiteMs = clock.whiteMs;
+  }
+
+  alreadyTimedOut(turn: Stone) {
+    return (
+      clockRunning({
+        kind: this.state.clockKind,
+        winner: this.state.winner,
+        players: this.seats.size,
+        away: this.state.away,
+      }) && timedOut(this.readClock(), turn)
+    );
+  }
+
+  finishByTime(turn: Stone) {
+    if (this.state.winner) return;
+    this.state.winner = turn === 1 ? "2" : "1";
+    this.state.endReason = "timeout";
+    void this.record();
+  }
+
+  advanceClock(elapsed: number) {
+    if (
+      !clockRunning({
+        kind: this.state.clockKind,
+        winner: this.state.winner,
+        players: this.seats.size,
+        away: this.state.away,
+      })
+    ) {
+      return;
+    }
+    const turn: Stone = this.state.turn === 2 ? 2 : 1;
+    const next = tickClock(this.readClock(), turn, elapsed);
+    this.writeClock(next);
+    if (timedOut(next, turn)) this.finishByTime(turn);
   }
 
   onJoin(client: Client, _options: unknown, auth?: TicketPayload) {
@@ -118,6 +201,7 @@ export class GomokuRoom extends Room<GomokuState, { code: string }, unknown, Tic
   }
 
   onDispose() {
+    this.stopPlayTimer();
     if (this.state?.code) releaseRoomCode(this.state.code);
   }
 }

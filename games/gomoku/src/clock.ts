@@ -42,3 +42,13 @@ export function undoClock(clock: Clock, previous: Clock): Clock {
   if (clock.kind !== "move") return clock;
   return { ...clock, blackMs: previous.blackMs, whiteMs: previous.whiteMs };
 }
+
+export function clockRunning(input: { kind: string; winner?: string; players: number; away?: number }) {
+  return Boolean(input.kind) && input.kind !== "none" && !input.winner && input.players >= 2 && !input.away;
+}
+
+export function formatClock(ms: number) {
+  const seconds = Math.max(0, Math.ceil(ms / 1000));
+  const minutes = Math.floor(seconds / 60);
+  return `${minutes}:${String(seconds % 60).padStart(2, "0")}`;
+}

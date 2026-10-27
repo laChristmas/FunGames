@@ -9,4 +9,9 @@ export const GomokuState = schema({
   away: "uint8",
   blackName: "string",
   whiteName: "string",
+  clockKind: "string",
+  clockBudget: "uint32",
+  blackMs: "uint32",
+  whiteMs: "uint32",
+  endReason: "string",
 });

@@ -9,6 +9,8 @@
     "./client": "./src/client.tsx",
     "./board": "./src/board.tsx",
     "./players": "./src/players.tsx",
+    "./clock-setup": "./src/clock-setup.tsx",
+    "./clock": "./src/clock.ts",
     "./room": "./src/room.ts",
     "./state": "./src/state.ts"
   },

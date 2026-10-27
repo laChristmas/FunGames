@@ -2,10 +2,13 @@
 
 import { Client, type Room } from "colyseus.js";
 import { GomokuBoard } from "@fungames/gomoku/board";
+import { formatClock } from "@fungames/gomoku/clock";
+import { ClockSetup } from "@fungames/gomoku/clock-setup";
 import { MatchPlayers } from "@fungames/gomoku/players";
 import { SIZE, type Cell } from "@fungames/gomoku/rules";
 import { GomokuState } from "@fungames/gomoku/state";
 import { useEffect, useRef, useState } from "react";
+import type { ClockChoice } from "@fungames/shared/clock";
 
 type Seat = 1 | 2;
 
@@ -18,10 +21,16 @@ type View = {
   away: number;
   blackName: string;
   whiteName: string;
+  clockKind: string;
+  blackMs: number;
+  whiteMs: number;
+  endReason: string;
 };
 
 function describe(view: View, seat: Seat | null) {
-  if (view.winner === "draw") return "平局";
+  if (view.winner === "draw" || view.endReason === "draw") return "平局";
+  if (view.endReason === "timeout" && view.winner === "1") return "白棋超时，黑棋胜";
+  if (view.endReason === "timeout" && view.winner === "2") return "黑棋超时，白棋胜";
   if (view.winner === "1") return "黑棋胜";
   if (view.winner === "2") return "白棋胜";
   if (view.away && view.away !== seat) return "对方断线";
@@ -37,6 +46,7 @@ export function OnlineMatch() {
   const [joinCode, setJoinCode] = useState("");
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
+  const [picking, setPicking] = useState(false);
   const [lastIndex, setLastIndex] = useState<number | null>(null);
   const previousBoard = useRef("");
 
@@ -68,6 +78,10 @@ export function OnlineMatch() {
         away: state.away ?? 0,
         blackName: state.blackName ?? "",
         whiteName: state.whiteName ?? "",
+        clockKind: state.clockKind ?? "none",
+        blackMs: state.blackMs ?? 0,
+        whiteMs: state.whiteMs ?? 0,
+        endReason: state.endReason ?? "",
       });
     };
     if (joined.state) apply(joined.state as View);
@@ -86,7 +100,7 @@ export function OnlineMatch() {
     return body.ticket;
   }
 
-  async function connect(action: "create" | "join") {
+  async function connect(action: "create" | "join", clock?: ClockChoice) {
     setError("");
     setCopied(false);
     try {
@@ -94,18 +108,31 @@ export function OnlineMatch() {
       const pass = await ticket();
       const joined =
         action === "create"
-          ? await client.create("gomoku", { ticket: pass }, GomokuState)
+          ? await client.create("gomoku", { ticket: pass, clock }, GomokuState)
           : await client.join("gomoku", { code: joinCode.trim().toUpperCase(), ticket: pass }, GomokuState);
+      setPicking(false);
       bind(joined);
     } catch {
       setError(action === "create" ? "创建失败" : "没有这个房间");
     }
   }
 
+  if (!view?.code && picking) {
+    return (
+      <div className="match">
+        <ClockSetup onStart={(clock) => connect("create", clock)} />
+        <button className="lobby" type="button" onClick={() => setPicking(false)}>
+          返回
+        </button>
+        {error ? <p className="form-error">{error}</p> : null}
+      </div>
+    );
+  }
+
   if (!view?.code) {
     return (
       <div className="match">
-        <button className="lobby" type="button" onClick={() => connect("create")}>
+        <button className="lobby" type="button" onClick={() => setPicking(true)}>
           创建房间
         </button>
         <input
@@ -155,6 +182,8 @@ export function OnlineMatch() {
           black={view.blackName || "等待加入"}
           white={view.whiteName || "等待加入"}
           active={view.winner || view.players < 2 ? null : view.turn === 2 ? 2 : 1}
+          blackTime={view.clockKind === "none" || view.clockKind === "" ? "" : formatClock(view.blackMs)}
+          whiteTime={view.clockKind === "none" || view.clockKind === "" ? "" : formatClock(view.whiteMs)}
         />
         <GomokuBoard
           cells={cells}

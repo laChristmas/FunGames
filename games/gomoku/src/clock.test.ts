@@ -1,6 +1,15 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { armTurn, createClock, tickClock, timedOut, undoClock } from "./clock.ts";
+import { armTurn, clockRunning, createClock, tickClock, timedOut, undoClock } from "./clock.ts";
+
+test("只有双方都在且没有断线时才走表", () => {
+  assert.equal(clockRunning({ kind: "move", winner: "", players: 2, away: 0 }), true);
+  assert.equal(clockRunning({ kind: "move", players: 2 }), true);
+  assert.equal(clockRunning({ kind: "none", winner: "", players: 2, away: 0 }), false);
+  assert.equal(clockRunning({ kind: "side", winner: "", players: 1, away: 0 }), false);
+  assert.equal(clockRunning({ kind: "side", winner: "", players: 2, away: 1 }), false);
+  assert.equal(clockRunning({ kind: "side", winner: "1", players: 2, away: 0 }), false);
+});
 
 test("不限时不会减少，也不会超时", () => {
   const clock = createClock({ kind: "none", ms: 0 });
