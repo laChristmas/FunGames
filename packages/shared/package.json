@@ -2,5 +2,14 @@
   "name": "@fungames/shared",
   "version": "0.0.0",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "exports": {
+    "./ticket": "./src/ticket.ts"
+  },
+  "scripts": {
+    "test": "node --import tsx --test src/ticket.test.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.6"
+  }
 }

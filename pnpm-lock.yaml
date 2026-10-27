@@ -19,6 +19,9 @@ importers:
       '@colyseus/ws-transport':
         specifier: 0.16.5
         version: 0.16.5(@colyseus/core@0.16.20(@colyseus/schema@3.0.76))
+      '@fungames/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
     devDependencies:
       tsx:
         specifier: ^4.23.15
@@ -32,6 +35,9 @@ importers:
       '@fungames/gomoku':
         specifier: workspace:*
         version: link:../../games/gomoku
+      '@fungames/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       better-auth:
         specifier: ^1.3.8
         version: 1.7.13(drizzle-kit@0.31.11)(drizzle-orm@0.44.7(kysely@0.29.7)(postgres@3.4.9))(next@15.5.28(@types/node@20.19.43)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -102,7 +108,11 @@ importers:
         specifier: ^5.9.2
         version: 5.9.3
 
-  packages/shared: {}
+  packages/shared:
+    devDependencies:
+      tsx:
+        specifier: ^4.20.6
+        version: 4.23.15
 
 packages:
 

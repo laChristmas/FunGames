@@ -1,5 +1,6 @@
-import { Room, Server } from "@colyseus/core";
+import { Room, Server, ServerError } from "@colyseus/core";
 import { WebSocketTransport } from "@colyseus/ws-transport";
+import { verifyTicket } from "@fungames/shared/ticket";
 
 if (!process.env.TICKET_SECRET) {
   console.error("缺少 TICKET_SECRET，联机服务没有启动。");
@@ -7,6 +8,15 @@ if (!process.env.TICKET_SECRET) {
 }
 
 class PingRoom extends Room {
+  async onAuth(_client: unknown, options: { ticket?: string }) {
+    try {
+      return verifyTicket(options?.ticket ?? "", process.env.TICKET_SECRET ?? "", "gomoku");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "凭证无效";
+      throw new ServerError(401, message);
+    }
+  }
+
   onCreate() {
     this.onMessage("ping", (client) => {
       client.send("pong");

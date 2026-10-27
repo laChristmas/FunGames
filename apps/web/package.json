@@ -10,6 +10,7 @@
   "dependencies": {
     "@fungames/db": "workspace:*",
     "@fungames/gomoku": "workspace:*",
+    "@fungames/shared": "workspace:*",
     "better-auth": "^1.3.8",
     "colyseus.js": "0.16.22",
     "drizzle-orm": "^0.44.6",

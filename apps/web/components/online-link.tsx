@@ -10,8 +10,16 @@ export function OnlineLink() {
     const client = new Client(`${location.protocol}//${location.host}`);
     let room: { leave: () => void } | undefined;
     let stopped = false;
-    client
-      .joinOrCreate("ping")
+    fetch("/api/ticket", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ slug: "gomoku" }),
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("凭证申请失败");
+        const body = (await response.json()) as { ticket: string };
+        return client.joinOrCreate("ping", { ticket: body.ticket });
+      })
       .then((joined) => {
         if (stopped) {
           joined.leave();
