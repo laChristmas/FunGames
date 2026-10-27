@@ -8,6 +8,8 @@
   --line: #e3e1da;
   --accent: #2457d6;
   --on-accent: #ffffff;
+  --board: #d7a15e;
+  --grid: #6b4423;
   color-scheme: light;
 }
 
@@ -19,6 +21,8 @@
   --line: #2c2c2c;
   --accent: #8eaeef;
   --on-accent: #101010;
+  --board: #8a5a32;
+  --grid: #f0d7b4;
   color-scheme: dark;
 }
 
@@ -209,9 +213,21 @@ body {
 .stage-wrap {
   flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 12px;
   min-height: 0;
+}
+
+.reselect {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
 }
 
 .stage {
@@ -268,4 +284,94 @@ body {
 .form-error {
   margin: 0;
   color: #b42318;
+}
+
+.match {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.match p {
+  margin: 0;
+}
+
+.gomoku {
+  display: grid;
+  grid-template-columns: repeat(15, minmax(0, 1fr));
+  width: min(100%, calc(100dvh - 300px));
+  aspect-ratio: 1;
+  background: var(--board);
+  touch-action: manipulation;
+}
+
+.gomoku button {
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border: 1px solid var(--grid);
+  background: transparent;
+  cursor: pointer;
+}
+
+.gomoku button:disabled {
+  cursor: default;
+}
+
+.stone {
+  display: block;
+  width: 72%;
+  height: 72%;
+  margin: auto;
+  border-radius: 50%;
+}
+
+.stone.black {
+  background: #111111;
+}
+
+.stone.white {
+  background: #f7f4ee;
+  box-shadow: inset 0 0 0 1px #111111;
+}
+
+.match-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.match-actions button {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+@media (max-height: 520px) {
+  .play-page {
+    min-height: 0;
+  }
+
+  .stage-wrap {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .match {
+    flex-direction: row;
+    width: auto;
+  }
+
+  .match-actions {
+    flex-direction: column;
+  }
+
+  .gomoku {
+    width: min(64dvh, calc(100dvh - 140px));
+  }
 }

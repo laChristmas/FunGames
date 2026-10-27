@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     "./rules": "./src/rules.ts",
-    "./ai": "./src/ai.ts"
+    "./ai": "./src/ai.ts",
+    "./client": "./src/client.tsx"
   },
   "scripts": {
     "test": "node --import tsx --test src/rules.test.ts"

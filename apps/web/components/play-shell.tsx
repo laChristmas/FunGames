@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { GomokuMatch } from "@fungames/gomoku/client";
 import { authClient } from "@/lib/auth-client";
 import type { GameMeta } from "@/lib/games";
 
@@ -49,12 +50,16 @@ export function PlayShell({ game }: { game: GameMeta }) {
         </div>
       ) : (
         <div className="stage-wrap">
-          <div className="stage" style={{ aspectRatio: String(game.aspect) }}>
-            <p>{mode === "online" ? "联机即将开放" : mode === "ai" ? "人机即将开放" : "同设备双人即将开放"}</p>
-            <button type="button" onClick={() => setMode(null)}>
-              重新选择
-            </button>
-          </div>
+          {mode === "online" ? (
+            <div className="stage" style={{ aspectRatio: String(game.aspect) }}>
+              <p>联机即将开放</p>
+            </div>
+          ) : (
+            <GomokuMatch mode={mode} />
+          )}
+          <button type="button" className="reselect" onClick={() => setMode(null)}>
+            重新选择
+          </button>
         </div>
       )}
     </main>
