@@ -19,6 +19,9 @@ importers:
       '@colyseus/ws-transport':
         specifier: 0.16.5
         version: 0.16.5(@colyseus/core@0.16.20(@colyseus/schema@3.0.76))
+      '@fungames/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@fungames/gomoku':
         specifier: workspace:*
         version: link:../../games/gomoku
@@ -93,6 +96,9 @@ importers:
       '@colyseus/schema':
         specifier: 3.0.76
         version: 3.0.76
+      '@fungames/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@fungames/shared':
         specifier: workspace:*
         version: link:../../packages/shared

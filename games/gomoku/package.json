@@ -19,7 +19,8 @@
   "dependencies": {
     "@colyseus/core": "0.16.20",
     "@colyseus/schema": "3.0.76",
-    "@fungames/shared": "workspace:*"
+    "@fungames/shared": "workspace:*",
+    "@fungames/db": "workspace:*"
   },
   "peerDependencies": {
     "react": "^19.0.0"

@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./records": "./src/records.ts"
   },
   "scripts": {
     "db:generate": "drizzle-kit generate",

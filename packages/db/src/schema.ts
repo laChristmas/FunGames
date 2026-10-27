@@ -57,3 +57,31 @@ export const profile = pgTable("profile", {
   displayName: text("display_name").notNull().unique(),
   theme: text("theme").notNull().default("system"),
 });
+
+export const game = pgTable("game", {
+  slug: text("slug").primaryKey(),
+  title: text("title").notNull(),
+  players: text("players").notNull(),
+});
+
+export const match = pgTable("match", {
+  id: text("id").primaryKey(),
+  gameSlug: text("game_slug")
+    .notNull()
+    .references(() => game.slug),
+  mode: text("mode").notNull(),
+  startedAt: timestamp("started_at").notNull().defaultNow(),
+  endedAt: timestamp("ended_at"),
+});
+
+export const matchPlayer = pgTable("match_player", {
+  id: text("id").primaryKey(),
+  matchId: text("match_id")
+    .notNull()
+    .references(() => match.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  result: text("result").notNull(),
+  score: text("score"),
+});
