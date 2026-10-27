@@ -57,23 +57,35 @@ export class GomokuRoom extends Room<GomokuState, { code: string }, unknown, Tic
       if (!result.winner) this.state.turn = seat.stone === 1 ? 2 : 1;
       if (result.winner) void this.record();
     });
+    this.onMessage("hello", (client) => {
+      const seat = this.seats.get(client.sessionId);
+      if (seat) client.send("seat", seat.stone);
+    });
   }
 
   onJoin(client: Client, _options: unknown, auth?: TicketPayload) {
     if (this.seats.has(client.sessionId) || this.seats.size >= 2 || !auth?.sub) return;
     const stone: Stone = this.seats.size === 0 ? 1 : 2;
     this.seats.set(client.sessionId, { stone, userId: auth.sub });
+    this.state.players = this.seats.size;
+    client.send("seat", stone);
   }
 
   async onLeave(client: Client, consented: boolean) {
+    const seat = this.seats.get(client.sessionId);
     if (consented) {
       this.seats.delete(client.sessionId);
+      this.state.players = this.seats.size;
       return;
     }
+    if (seat) this.state.away = seat.stone;
     try {
       await this.allowReconnection(client, 60);
+      this.state.away = 0;
     } catch {
       this.seats.delete(client.sessionId);
+      this.state.away = 0;
+      this.state.players = this.seats.size;
     }
   }
 

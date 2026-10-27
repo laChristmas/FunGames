@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { GomokuMatch } from "@fungames/gomoku/client";
-import { OnlineLink } from "@/components/online-link";
+import { OnlineMatch } from "@/components/online-match";
 import { authClient } from "@/lib/auth-client";
 import type { GameMeta } from "@/lib/games";
 
@@ -52,9 +52,7 @@ export function PlayShell({ game }: { game: GameMeta }) {
       ) : (
         <div className="stage-wrap">
           {mode === "online" ? (
-            <div className="stage" style={{ aspectRatio: String(game.aspect) }}>
-              <OnlineLink />
-            </div>
+            <OnlineMatch />
           ) : (
             <GomokuMatch mode={mode} />
           )}

@@ -301,7 +301,7 @@ body {
 .gomoku {
   display: grid;
   grid-template-columns: repeat(15, minmax(0, 1fr));
-  width: min(100%, calc(100dvh - 300px));
+  width: min(100%, calc(100dvh - 320px));
   aspect-ratio: 1;
   background: var(--board);
   touch-action: manipulation;
@@ -342,7 +342,18 @@ body {
   gap: 8px;
 }
 
-.match-actions button {
+.online-code {
+  min-height: 44px;
+  width: min(100%, 240px);
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.match-actions button,
+.match .lobby {
   min-height: 44px;
   padding: 0 16px;
   border: 1px solid var(--line);
